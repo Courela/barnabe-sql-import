@@ -164,7 +164,7 @@ func parsePersons(scanner *bufio.Scanner) {
 				if len(email) > 0 {
 					log.Printf("    Email = %s", email[1])
 					if !strings.Contains(email[1], "null") {
-						phoneVal = fmt.Sprintf("'%s'", strings.Trim(email[1], ",\""))
+						emailVal = fmt.Sprintf("'%s'", strings.Trim(email[1], ",\""))
 					}
 					scanner.Scan()
 				}
