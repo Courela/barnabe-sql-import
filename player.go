@@ -216,8 +216,8 @@ func parsePlayers(scanner *bufio.Scanner) {
 func writePlayers(f *os.File) {
 	for _, player := range players {
 		f.WriteString(
-			fmt.Sprintf("INSERT INTO player (Season, TeamId, StepId, PersonId, Resident, RoleId, CareTakerId, Comments, PhotoFilename, DocFilename, CreatedAt, LastUpdatedAt)"+
-				" VALUES (%d, %d, %d, %d, %t, %d, %s, %s, %s, %s, %s, %s);\n",
+			fmt.Sprintf("INSERT INTO player (Season, TeamId, StepId, PersonId, Resident, RoleId, CareTakerId, Comments, PhotoFilename, DocFilename, CreatedAt, LastUpdatedAt) \n"+
+				"VALUES (%d, %d, %d, %d, %t, %d, %s, %s, %s, %s, %s, %s);\n",
 				player.season, player.teamId, player.stepId, player.personId, player.resident, player.roleId, player.careTakerId, player.comments, player.photoFileName, player.docFilename, player.createdAt, player.lastUpdatedAt))
 	}
 	log.Printf("Processed %d players", len(players))

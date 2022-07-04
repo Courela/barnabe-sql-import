@@ -237,11 +237,12 @@ func parsePersons(scanner *bufio.Scanner) {
 }
 
 func writePersons(f *os.File) {
+	dateFormat := "%Y-%c-%dT%T"
 	for _, person := range persons {
 		f.WriteString(
-			fmt.Sprintf("INSERT INTO person (Id, Name, Gender, Birthdate, IdCardNr, IdCardExpireDate, VoterNr, Phone, Email, LocalBorn, LocalTown, CreatedAt, LastUpdatedAt)"+
-				" VALUES (%d, '%s', %s, '%s', '%s', %s, %s, %s, %s, %t, %t, '%s', %s);\n",
-				person.id, person.name, person.gender, person.birthdate, person.idCardNr, person.idCardExpireDate, person.voterNr, person.phone, person.email, person.localBorn, person.localTown, person.createdAt, person.lastUpdatedAt))
+			fmt.Sprintf("INSERT INTO person (Id, Name, Gender, Birthdate, IdCardNr, IdCardExpireDate, VoterNr, Phone, Email, LocalBorn, LocalTown, CreatedAt, LastUpdatedAt) \n"+
+				"VALUES (%d, '%s', %s, STR_TO_DATE('%s','%s'), '%s', %s, %s, %s, %s, %t, %t, STR_TO_DATE('%s', '%s'), %s);\n",
+				person.id, person.name, person.gender, person.birthdate, dateFormat, person.idCardNr, person.idCardExpireDate, person.voterNr, person.phone, person.email, person.localBorn, person.localTown, person.createdAt, dateFormat, person.lastUpdatedAt))
 	}
 	log.Printf("Processed %d persons", len(persons))
 }
