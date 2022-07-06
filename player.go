@@ -11,6 +11,7 @@ import (
 )
 
 type player struct {
+	id            uint
 	season        uint16
 	teamId        uint8
 	stepId        uint8
@@ -194,7 +195,9 @@ func parsePlayers(scanner *bufio.Scanner) {
 				}
 			}
 
+			idVal := parseInt(id[1])
 			players = append(players, player{
+				id:            uint(idVal),
 				season:        uint16(seasonVal),
 				teamId:        uint8(teamIdVal),
 				stepId:        uint8(stepIdVal),
@@ -216,9 +219,9 @@ func parsePlayers(scanner *bufio.Scanner) {
 func writePlayers(f *os.File) {
 	for _, player := range players {
 		f.WriteString(
-			fmt.Sprintf("INSERT INTO player (Season, TeamId, StepId, PersonId, Resident, RoleId, CareTakerId, Comments, PhotoFilename, DocFilename, CreatedAt, LastUpdatedAt) \n"+
-				"VALUES (%d, %d, %d, %d, %t, %d, %s, %s, %s, %s, %s, %s);\n",
-				player.season, player.teamId, player.stepId, player.personId, player.resident, player.roleId, player.careTakerId, player.comments, player.photoFileName, player.docFilename, player.createdAt, player.lastUpdatedAt))
+			fmt.Sprintf("INSERT INTO player (Id, Season, TeamId, StepId, PersonId, Resident, RoleId, CareTakerId, Comments, PhotoFilename, DocFilename, CreatedAt, LastUpdatedAt) \n"+
+				"VALUES (%d, %d, %d, %d, %d, %t, %d, %s, %s, %s, %s, %s, %s);\n",
+				player.id, player.season, player.teamId, player.stepId, player.personId, player.resident, player.roleId, player.careTakerId, player.comments, player.photoFileName, player.docFilename, player.createdAt, player.lastUpdatedAt))
 	}
 	log.Printf("Processed %d players", len(players))
 }
