@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 )
 
 type teamStep struct {
@@ -57,7 +58,7 @@ func parseTeamSteps(scanner *bufio.Scanner) {
 							teamId:    uint8(parseInt(teamId[1])),
 							stepId:    uint8(parseInt(stepId[1])),
 							season:    uint16(parseInt(season[1])),
-							createdAt: createdAt[1],
+							createdAt: strings.Split(createdAt[1], ".")[0],
 						})
 					}
 				}
@@ -75,10 +76,11 @@ func parseTeamSteps(scanner *bufio.Scanner) {
 }
 
 func writeTeamSteps(f *os.File) {
+	dateFormat := "%Y-%c-%dT%T"
 	for _, teamStep := range teamSteps {
 		f.WriteString(
-			fmt.Sprintf("INSERT INTO teamstep (TeamId, StepId, Season, CreatedAt) VALUES (%d, %d, %d, '%s');\n",
-				teamStep.teamId, teamStep.stepId, teamStep.season, teamStep.createdAt))
+			fmt.Sprintf("INSERT INTO teamstep (TeamId, StepId, Season, CreatedAt) VALUES (%d, %d, %d, STR_TO_DATE('%s', '%s'));\n",
+				teamStep.teamId, teamStep.stepId, teamStep.season, teamStep.createdAt, dateFormat))
 	}
 	log.Printf("Processed %d team steps", len(teamSteps))
 }

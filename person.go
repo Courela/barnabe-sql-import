@@ -80,7 +80,7 @@ func parsePersons(scanner *bufio.Scanner) {
 			lb := false
 			lt := false
 			createdAtVal := ""
-			lastUpdatedAtVal := "NULL"
+			lastUpdatedAtVal := "CURRENT_TIMESTAMP"
 			scanner.Scan()
 
 			endPerson, err := regexp.MatchString("^\\s*},\\s*$", scanner.Text())
@@ -109,6 +109,7 @@ func parsePersons(scanner *bufio.Scanner) {
 					log.Printf("    Birthdate = %s", birthdate[1])
 					if !strings.Contains(birthdate[1], "null") {
 						birthdateVal = strings.Trim(birthdate[1], ",\"")
+						birthdateVal = strings.Split(birthdateVal, "T")[0]
 					}
 					scanner.Scan()
 				}
@@ -187,13 +188,15 @@ func parsePersons(scanner *bufio.Scanner) {
 				if len(createdAt) > 0 {
 					log.Printf("    CreatedAt = %s", createdAt[1])
 					createdAtVal = createdAt[1]
+					createdAtVal = strings.Split(createdAtVal, ".")[0]
 					scanner.Scan()
 				}
 
 				lastUpdatedAt := personLastUpdatedAtRegex.FindStringSubmatch(scanner.Text())
 				if len(lastUpdatedAt) > 0 {
 					log.Printf("    LastUpdatedAt = %s", lastUpdatedAt[1])
-					lastUpdatedAtVal = fmt.Sprintf("'%s'", lastUpdatedAt[1])
+					lastUpdatedAtVal = fmt.Sprintf("'%s'", strings.Split(lastUpdatedAt[1], ".")[0])
+					lastUpdatedAtVal = "STR_TO_DATE(" + lastUpdatedAtVal + ", '%Y-%c-%dT%T')"
 					scanner.Scan()
 				}
 
@@ -241,8 +244,8 @@ func writePersons(f *os.File) {
 	for _, person := range persons {
 		f.WriteString(
 			fmt.Sprintf("INSERT INTO person (Id, Name, Gender, Birthdate, IdCardNr, IdCardExpireDate, VoterNr, Phone, Email, LocalBorn, LocalTown, CreatedAt, LastUpdatedAt) \n"+
-				"VALUES (%d, '%s', %s, STR_TO_DATE('%s','%s'), '%s', %s, %s, %s, %s, %t, %t, STR_TO_DATE('%s', '%s'), %s);\n",
-				person.id, person.name, person.gender, person.birthdate, dateFormat, person.idCardNr, person.idCardExpireDate, person.voterNr, person.phone, person.email, person.localBorn, person.localTown, person.createdAt, dateFormat, person.lastUpdatedAt))
+				"VALUES (%d, '%s', %s, '%s', '%s', %s, %s, %s, %s, %t, %t, STR_TO_DATE('%s', '%s'), %s);\n",
+				person.id, person.name, person.gender, person.birthdate, person.idCardNr, person.idCardExpireDate, person.voterNr, person.phone, person.email, person.localBorn, person.localTown, person.createdAt, dateFormat, person.lastUpdatedAt))
 	}
 	log.Printf("Processed %d persons", len(persons))
 }

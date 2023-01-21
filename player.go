@@ -84,7 +84,7 @@ func parsePlayers(scanner *bufio.Scanner) {
 			photoFilenameVal := "NULL"
 			docFilenameVal := "NULL"
 			createdAtVal := ""
-			lastUpdatedAtVal := "NULL"
+			lastUpdatedAtVal := "CURRENT_TIMESTAMP"
 
 			for !endPlayer {
 				season := playerSeasonRegex.FindStringSubmatch(scanner.Text())
@@ -175,7 +175,7 @@ func parsePlayers(scanner *bufio.Scanner) {
 				if len(createdAt) > 0 {
 					log.Printf("    CreatedAt = %s", createdAt[1])
 					if !strings.Contains(createdAt[1], "null") {
-						createdAtVal = fmt.Sprintf("'%s'", strings.Trim(createdAt[1], ",\""))
+						createdAtVal = fmt.Sprintf("'%s'", strings.Split(strings.Trim(createdAt[1], ",\""), ".")[0])
 					}
 					scanner.Scan()
 				}
@@ -184,7 +184,7 @@ func parsePlayers(scanner *bufio.Scanner) {
 				if len(lastUpdatedAt) > 0 {
 					log.Printf("    LastUpdatedAt = %s", lastUpdatedAt[1])
 					if !strings.Contains(lastUpdatedAt[1], "null") {
-						lastUpdatedAtVal = fmt.Sprintf("'%s'", strings.Trim(lastUpdatedAt[1], ",\""))
+						lastUpdatedAtVal = fmt.Sprintf("'%s'", strings.Split(strings.Trim(lastUpdatedAt[1], ",\""), ".")[0])
 					}
 					scanner.Scan()
 				}
@@ -217,11 +217,12 @@ func parsePlayers(scanner *bufio.Scanner) {
 }
 
 func writePlayers(f *os.File) {
+	dateFormat := "%Y-%c-%dT%T"
 	for _, player := range players {
 		f.WriteString(
 			fmt.Sprintf("INSERT INTO player (Id, Season, TeamId, StepId, PersonId, Resident, RoleId, CareTakerId, Comments, PhotoFilename, DocFilename, CreatedAt, LastUpdatedAt) \n"+
-				"VALUES (%d, %d, %d, %d, %d, %t, %d, %s, %s, %s, %s, %s, %s);\n",
-				player.id, player.season, player.teamId, player.stepId, player.personId, player.resident, player.roleId, player.careTakerId, player.comments, player.photoFileName, player.docFilename, player.createdAt, player.lastUpdatedAt))
+				"VALUES (%d, %d, %d, %d, %d, %t, %d, %s, %s, %s, %s, STR_TO_DATE(%s,'%s'), %s);\n",
+				player.id, player.season, player.teamId, player.stepId, player.personId, player.resident, player.roleId, player.careTakerId, player.comments, player.photoFileName, player.docFilename, player.createdAt, dateFormat, player.lastUpdatedAt))
 	}
 	log.Printf("Processed %d players", len(players))
 }
